@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id='display'>
+        ああああああああああああああああああああああああああああああああ
+    </div>
+    
+    <button id="exit">
+        スクロール終了
+    </button>
+
+    <style>
+        #display{
+            width: 100px;
+        }
+    </style>
+    <script>
+        function StartScroll(target_id){
+            const ele = document.getElementById(target_id);
+            var style = ele.style;
+            style.overflowY = "scroll";//横スクロールする
+            style.whiteSpace = "nowrap";//改行しない
+            style.setProperty("-ms-overflow-style","none");
+            style.setProperty("scrollbar-width","none");
+            style.setProperty("-webkit-scrollbar","none");
+
+            /**
+             * この値がno以外になったらスクロールを終了する
+             */
+            let scroll_exit = "no";
+            
+            function scroll(){
+                if(scroll_exit == "no"){//スクロールが終了に設定されていない事を確認
+                    if(!ele.scrollWidth == 0){//スクロールが必要な場合
+                        let lastLeft = ele.scrollLeft;//現在のスクロール位置を記録
+                        function move_left(){//実際にスクロールする関数
+                            ele.scrollLeft++;//1スクロールする
+                            if(lastLeft == ele.scrollLeft){//最後までスクロールした事を確認
+                                setTimeout(function(){//1000ms(1秒)後に一番左に戻す
+                                    ele.scrollLeft = 0;//1000ms(1秒)後に一番左に戻す
+                                    setTimeout(scroll,2000);//一番左に戻してから2000ms(2秒)後にスクロールを再開する
+                                },1000);//1000ms(1秒)後に一番左に戻す
+                            }else{//最後までスクロールしていない場合
+                                lastLeft = ele.scrollLeft;//現在のスクロール位置を更新
+                                setTimeout(move_left,20)//20はスクロール速度（値が小さい方が早くスクロール）
+                            };
+                        };
+                        move_left();//最初の一回を実行
+                    }else{//スクロールが不要な場合
+                        setTimeout(scroll,2000)//2000ms(2秒)後にもう一度スクロールが必要か確認
+                    };
+                };
+            };
+            
+            new Promise(() => {//非同期で
+                scroll();//最初のスクロールを開始する
+            });
+
+            return function(){
+                scroll_exit = "yes";
+            };
+        };
+
+
+
+
+        var end = StartScroll("display");//スクロールを開始する
+
+
+
+        //終了ボタンが押されたときの処理
+        document.getElementById("exit").onclick = function(){
+            end();
+        };
+    </script>
+</body>
+</html>
